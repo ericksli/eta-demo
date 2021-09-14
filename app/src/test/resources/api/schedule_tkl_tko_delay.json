@@ -1,0 +1,13 @@
+{
+  "status": 1,
+  "message": "successful",
+  "curr_time": "-",
+  "sys_time": "-",
+  "isdelay": "Y",
+  "data": {
+    "TKL-TKO": {
+      "curr_time": "-",
+      "sys_time": "-"
+    }
+  }
+}

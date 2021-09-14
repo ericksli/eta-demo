@@ -1,0 +1,101 @@
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+    id 'kotlinx-serialization'
+    id 'dagger.hilt.android.plugin'
+}
+
+android {
+    compileSdk 30
+
+    defaultConfig {
+        applicationId "net.swiftzer.etademo"
+        minSdk 21
+        targetSdk 30
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+        freeCompilerArgs += [
+                "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi",
+        ]
+    }
+}
+
+dependencies {
+    def ktorVersion = '1.6.3'
+    def coroutinesVersion = '1.5.1'
+    def lifecycleVersion = '2.4.0-alpha03'
+    def mockkVersion = '1.12.0'
+
+
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
+
+    implementation 'androidx.core:core-ktx:1.6.0'
+    implementation 'androidx.appcompat:appcompat:1.3.1'
+    implementation 'com.google.android.material:material:1.4.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.0'
+    implementation 'androidx.activity:activity-ktx:1.3.1'
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:$lifecycleVersion"
+
+    implementation "com.google.dagger:hilt-android:$daggerVersion"
+    kapt "com.google.dagger:hilt-compiler:$daggerVersion"
+    testImplementation "com.google.dagger:hilt-android-testing:$daggerVersion"
+    testAnnotationProcessor "com.google.dagger:hilt-compiler:$daggerVersion"
+    androidTestImplementation "com.google.dagger:hilt-android-testing:$daggerVersion"
+    androidTestAnnotationProcessor "com.google.dagger:hilt-compiler:$daggerVersion"
+
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion"
+
+    implementation "io.ktor:ktor-client-core:$ktorVersion"
+    implementation "io.ktor:ktor-client-cio:$ktorVersion"
+    implementation "io.ktor:ktor-client-okhttp:$ktorVersion"
+    implementation "io.ktor:ktor-client-logging:$ktorVersion"
+    implementation "io.ktor:ktor-client-serialization:$ktorVersion"
+    testImplementation "io.ktor:ktor-client-mock:$ktorVersion"
+    implementation "com.squareup.okhttp3:okhttp:4.9.0"
+
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2"
+
+    implementation 'org.slf4j:slf4j-api:1.7.31'
+    implementation "com.github.tony19:logback-android:$logbackAndroidVersion"
+
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+
+    testImplementation platform("io.strikt:strikt-bom:0.31.0")
+    testImplementation "io.strikt:strikt-core"
+    testImplementation "io.strikt:strikt-mockk"
+
+    testImplementation "io.mockk:mockk:$mockkVersion"
+    androidTestImplementation "io.mockk:mockk-android:$mockkVersion"
+
+}
+
+configurations.all { config ->
+    if (config.name.toLowerCase().contains('test')) {
+        config.resolutionStrategy.dependencySubstitution {
+            substitute module("com.github.tony19:logback-android:$logbackAndroidVersion") with module("ch.qos.logback:logback-classic:$logbackVersion")
+        }
+    }
+}
