@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="child"
+            type="net.swiftzer.etademo.presentation.stationlist.StationListItem.Child" />
+
+        <variable
+            name="presenter"
+            type="net.swiftzer.etademo.presentation.stationlist.LineStationPresenter" />
+
+
+        <variable
+            name="callback"
+            type="net.swiftzer.etademo.presentation.stationlist.StationListAdapter.Callback" />
+    </data>
+
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="?selectableItemBackground"
+        android:clickable="true"
+        android:ellipsize="end"
+        android:focusable="true"
+        android:gravity="center_vertical|start"
+        android:maxLines="1"
+        android:onClick="@{() -> callback.onClickLineAndStation(child.line, child.station)}"
+        android:paddingStart="56dp"
+        android:paddingEnd="16dp"
+        android:text="@{presenter.mapStation(child.station)}"
+        android:textAlignment="viewStart"
+        android:textAppearance="?textAppearanceBody2"
+        tools:text="@tools:sample/cities" />
+</layout>

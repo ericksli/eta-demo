@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/eta"
+    app:startDestination="@id/stationListFragment">
+
+    <fragment
+        android:id="@+id/stationListFragment"
+        android:name="net.swiftzer.etademo.presentation.stationlist.StationListFragment"
+        android:label="StationListFragment"
+        tools:layout="@layout/station_list_fragment">
+        <action
+            android:id="@+id/action_stationListFragment_to_etaFragment"
+            app:destination="@id/etaFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/etaFragment"
+        android:name="net.swiftzer.etademo.presentation.eta.EtaFragment"
+        android:label="EtaFragment"
+        tools:layout="@layout/eta_fragment">
+        <argument
+            android:name="line"
+            app:argType="net.swiftzer.etademo.common.Line" />
+        <argument
+            android:name="station"
+            app:argType="net.swiftzer.etademo.common.Station" />
+    </fragment>
+</navigation>

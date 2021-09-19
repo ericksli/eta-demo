@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="group"
+            type="net.swiftzer.etademo.presentation.stationlist.StationListItem.Group" />
+
+        <variable
+            name="presenter"
+            type="net.swiftzer.etademo.presentation.stationlist.LineStationPresenter" />
+
+        <variable
+            name="callback"
+            type="net.swiftzer.etademo.presentation.stationlist.StationListAdapter.Callback" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="?selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:onClick="@{() -> callback.toggleExpanded(group.line)}"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@null"
+            android:src="@{group.expanded ? @drawable/ic_baseline_arrow_drop_down_24 : @drawable/ic_baseline_arrow_end_24}"
+            tools:src="@drawable/ic_baseline_arrow_drop_down_24" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@{presenter.mapLine(group.line)}"
+            android:textAlignment="viewStart"
+            android:textAppearance="?textAppearanceBody1"
+            tools:text="@tools:sample/cities" />
+    </LinearLayout>
+</layout>

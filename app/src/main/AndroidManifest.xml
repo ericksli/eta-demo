@@ -14,8 +14,9 @@
         android:networkSecurityConfig="@xml/network_security_config"
         android:theme="@style/Theme.ETADemo">
         <activity
-            android:name=".MainActivity"
+            android:name=".presentation.MainActivity"
             android:exported="true">
+            <nav-graph android:value="@navigation/eta" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

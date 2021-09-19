@@ -1,5 +1,8 @@
 package net.swiftzer.etademo.common
 
+import androidx.annotation.Keep
+
+@Keep
 enum class Station(val zh: String, val en: String) {
     UNKNOWN("", ""),
 

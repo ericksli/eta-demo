@@ -1,5 +1,8 @@
 package net.swiftzer.etademo.common
 
+import androidx.annotation.Keep
+
+@Keep
 enum class Line(val zh: String, val en: String) {
     AEL("機場快綫", "Airport Express"),
     TCL("東涌綫", "Tung Chung Line"),
