@@ -119,6 +119,16 @@ class EtaFragment : Fragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.startAutoRefresh()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.stopAutoRefresh()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         binding.recyclerView.adapter = null
