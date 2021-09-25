@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="countdown_minute">
+        <item quantity="one">%1$s minute</item>
+        <item quantity="other">%1$d minutes</item>
+    </plurals>
+</resources>

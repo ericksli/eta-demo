@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">抵站時間示範</string>
+    <string name="error">出了些問題</string>
+    <string name="incident_cta">詳情</string>
+    <string name="delay">班次延誤，未能顯示抵站時間</string>
+    <string name="platform">%1$s 號月台</string>
+    <string name="up_track">上行</string>
+    <string name="down_track">下行</string>
+    <string name="change_sorting">切換排序</string>
+    <string name="try_again">再試一次</string>
+    <string name="cannot_launch_browser">無法啟動網頁瀏覽器</string>
+</resources>

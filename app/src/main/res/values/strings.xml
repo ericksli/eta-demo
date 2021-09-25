@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">ETA Demo</string>
+    <string name="error">Something went wrong</string>
+    <string name="incident_cta">View detail</string>
+    <string name="delay">Cannot show ETA due to train delays</string>
+    <string name="platform">Platform %1$s</string>
+    <string name="up_track">Up track</string>
+    <string name="down_track">Down track</string>
+    <string name="change_sorting">Change sorting</string>
+    <string name="try_again">Try again</string>
+    <string name="cannot_launch_browser">Cannot launch web browser</string>
 </resources>
