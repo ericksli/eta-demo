@@ -58,7 +58,7 @@ class EtaViewModel @Inject constructor(
             return _autoRefreshScope
         }
 
-    private val etaResult: StateFlow<TimedValue<Loadable<EtaResult>>> = triggerRefresh
+    private val etaResult: StateFlow<CachedResult> = triggerRefresh
         .consumeAsFlow()
         .flatMapLatest {
             flowOf(
@@ -82,24 +82,76 @@ class EtaViewModel @Inject constructor(
                 },
             ).flattenConcat()
         }
+        .scan(CachedResult()) { acc, currentValue ->
+            if (currentValue.value is Loadable.Loaded) {
+                val currentResult = currentValue.value.value
+                CachedResult(
+                    lastSuccessResult = if (currentResult is EtaResult.Success) currentResult else acc.lastSuccessResult,
+                    lastFailResult = if (currentResult is EtaFailResult) currentResult else null,
+                    currentResult = currentValue,
+                )
+            } else {
+                acc.copy(currentResult = currentValue)
+            }
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(STATE_FLOW_STOP_TIMEOUT_MILLIS),
-            initialValue = TimedValue(value = Loadable.Loading, updatedAt = Instant.EPOCH),
+            initialValue = CachedResult(),
         )
+
+    private val screenState = etaResult.map {
+        when (it.currentResult.value) {
+            is Loadable.Loaded -> {
+                when (it.currentResult.value.value) {
+                    EtaResult.Delay,
+                    is EtaResult.Incident -> ScreenState.FULL_SCREEN_ERROR
+                    is EtaResult.Error,
+                    EtaResult.InternalServerError,
+                    EtaResult.TooManyRequests -> if (it.lastSuccessResult != null) {
+                        ScreenState.ETA_WITH_ERROR_BANNER
+                    } else {
+                        ScreenState.FULL_SCREEN_ERROR
+                    }
+                    is EtaResult.Success -> ScreenState.ETA
+                }
+            }
+            Loadable.Loading -> when (it.lastFailResult) {
+                EtaResult.Delay,
+                is EtaResult.Incident -> ScreenState.FULL_SCREEN_ERROR
+                is EtaResult.Error,
+                EtaResult.InternalServerError,
+                EtaResult.TooManyRequests -> if (it.lastSuccessResult != null) {
+                    ScreenState.ETA_WITH_ERROR_BANNER
+                } else {
+                    ScreenState.FULL_SCREEN_ERROR
+                }
+                null -> if (it.lastSuccessResult != null) {
+                    ScreenState.ETA
+                } else {
+                    ScreenState.LOADING
+                }
+            }
+        }
+    }
+
     private val loadedEtaResult = etaResult
-        .map { it.value }
+        .map { it.currentResult.value }
         .filterIsInstance<Loadable.Loaded<EtaResult>>()
         .map { it.value }
-    val showLoading: StateFlow<Boolean> = etaResult
-        .map { it.value == Loadable.Loading }
+    val showLoading: StateFlow<Boolean> = screenState.map { it == ScreenState.LOADING }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(STATE_FLOW_STOP_TIMEOUT_MILLIS),
             initialValue = true,
         )
-    val showError = etaResult
-        .map { it.value is Loadable.Loaded && it.value.value is EtaFailResult }
+    val showFullScreenError = screenState.map { it == ScreenState.FULL_SCREEN_ERROR }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(STATE_FLOW_STOP_TIMEOUT_MILLIS),
+            initialValue = false,
+        )
+    val showErrorBanner = screenState.map { it == ScreenState.ETA_WITH_ERROR_BANNER }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(STATE_FLOW_STOP_TIMEOUT_MILLIS),
@@ -131,16 +183,15 @@ class EtaViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(STATE_FLOW_STOP_TIMEOUT_MILLIS),
             initialValue = EtaResult.InternalServerError,
         )
-    val showEtaList = etaResult
-        .map { it.value is Loadable.Loaded && it.value.value is EtaResult.Success }
+    val showEtaList = screenState
+        .map { it == ScreenState.ETA || it == ScreenState.ETA_WITH_ERROR_BANNER }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(STATE_FLOW_STOP_TIMEOUT_MILLIS),
             initialValue = false,
         )
-    val etaList = loadedEtaResult
-        .filterIsInstance<EtaResult.Success>()
-        .map { it.schedule }
+    val etaList = etaResult
+        .map { it.lastSuccessResult?.schedule.orEmpty() }
         .combine(sortedBy) { schedule, sortedBy ->
             sequence {
                 var lastDirection: EtaResult.Success.Eta.Direction? = null
@@ -195,7 +246,8 @@ class EtaViewModel @Inject constructor(
 
     fun startAutoRefresh() {
         autoRefreshScope.launch {
-            val delayDuration = JavaDuration.between(etaResult.value.updatedAt, clock.instant())
+            val delayDuration =
+                JavaDuration.between(etaResult.value.currentResult.updatedAt, clock.instant())
             if (delayDuration >= AUTO_REFRESH_INTERVAL.toJavaDuration()) {
                 triggerRefresh.send(Unit)
             } else {
@@ -211,7 +263,7 @@ class EtaViewModel @Inject constructor(
     }
 
     fun viewIncidentDetail() {
-        val result = etaResult.value.value
+        val result = etaResult.value.currentResult.value
         if (result !is Loadable.Loaded) return
         if (result.value !is EtaResult.Incident) return
         viewModelScope.launch {
@@ -223,4 +275,20 @@ class EtaViewModel @Inject constructor(
         val value: T,
         val updatedAt: Instant,
     )
+
+    private data class CachedResult(
+        val lastSuccessResult: EtaResult.Success? = null,
+        val lastFailResult: EtaFailResult? = null,
+        val currentResult: TimedValue<Loadable<EtaResult>> = TimedValue(
+            value = Loadable.Loading,
+            updatedAt = Instant.EPOCH
+        ),
+    )
+
+    private enum class ScreenState {
+        LOADING,
+        ETA,
+        FULL_SCREEN_ERROR,
+        ETA_WITH_ERROR_BANNER,
+    }
 }

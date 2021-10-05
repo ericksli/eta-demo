@@ -40,16 +40,56 @@
                 tools:title="@tools:sample/cities" />
         </com.google.android.material.appbar.AppBarLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
+        <LinearLayout
             isVisible="@{viewModel.showEtaList}"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            tools:listitem="@layout/eta_list_eta_item" />
+            android:divider="?android:listDivider"
+            android:orientation="vertical"
+            android:showDividers="middle"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <LinearLayout
+                isVisible="@{viewModel.showErrorBanner}"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingTop="8dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="8dp"
+                tools:visibility="visible">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:layout_weight="1"
+                    android:text="@{etaPresenter.mapErrorMessage(viewModel.errorResult)}"
+                    android:textAlignment="viewStart"
+                    android:textAppearance="?textAppearanceBody1"
+                    android:textColor="@color/design_default_color_error"
+                    tools:text="@string/error" />
+
+                <com.google.android.material.button.MaterialButton
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="@{() -> viewModel.refresh()}"
+                    android:text="@string/try_again" />
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                tools:listitem="@layout/eta_list_eta_item" />
+        </LinearLayout>
 
         <androidx.core.widget.NestedScrollView
-            isVisible="@{viewModel.showError}"
+            isVisible="@{viewModel.showFullScreenError}"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:fillViewport="true"
