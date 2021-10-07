@@ -42,6 +42,11 @@ android {
                 "-Xuse-experimental=kotlin.time.ExperimentalTime",
         ]
     }
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
