@@ -26,7 +26,7 @@ import java.time.Duration as JavaDuration
 import kotlin.time.Duration as KotlinDuration
 
 private const val SORT_BY = "sort_by"
-private val AUTO_REFRESH_INTERVAL = KotlinDuration.seconds(10)
+val AUTO_REFRESH_INTERVAL = KotlinDuration.seconds(10)
 
 @HiltViewModel
 class EtaViewModel @Inject constructor(
@@ -58,7 +58,7 @@ class EtaViewModel @Inject constructor(
             return _autoRefreshScope
         }
 
-    private val etaResult: StateFlow<CachedResult> = triggerRefresh
+    private val etaResult: SharedFlow<CachedResult> = triggerRefresh
         .consumeAsFlow()
         .flatMapLatest {
             flowOf(
@@ -94,10 +94,10 @@ class EtaViewModel @Inject constructor(
                 acc.copy(currentResult = currentValue)
             }
         }
-        .stateIn(
+        .shareIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(STATE_FLOW_STOP_TIMEOUT_MILLIS),
-            initialValue = CachedResult(),
+            replay = 1,
         )
 
     private val screenState = etaResult.map {
@@ -247,7 +247,7 @@ class EtaViewModel @Inject constructor(
     fun startAutoRefresh() {
         autoRefreshScope.launch {
             val delayDuration =
-                JavaDuration.between(etaResult.value.currentResult.updatedAt, clock.instant())
+                JavaDuration.between(etaResult.first().currentResult.updatedAt, clock.instant())
             if (delayDuration >= AUTO_REFRESH_INTERVAL.toJavaDuration()) {
                 triggerRefresh.send(Unit)
             } else {
@@ -263,11 +263,10 @@ class EtaViewModel @Inject constructor(
     }
 
     fun viewIncidentDetail() {
-        val result = etaResult.value.currentResult.value
-        if (result !is Loadable.Loaded) return
-        if (result.value !is EtaResult.Incident) return
         viewModelScope.launch {
-            _viewIncidentDetail.send(result.value.url)
+            val result = etaResult.first().lastFailResult
+            if (result !is EtaResult.Incident) return@launch
+            _viewIncidentDetail.send(result.url)
         }
     }
 

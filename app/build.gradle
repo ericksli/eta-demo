@@ -111,6 +111,7 @@ dependencies {
     testImplementation "io.strikt:strikt-core"
     testImplementation "io.strikt:strikt-mockk"
     testImplementation 'app.cash.turbine:turbine:0.6.1'
+    testImplementation 'org.threeten:threeten-extra:1.7.0'
 
     testImplementation "io.mockk:mockk:$mockkVersion"
     androidTestImplementation "io.mockk:mockk-android:$mockkVersion"
